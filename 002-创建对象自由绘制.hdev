@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<l>dev_close_window ()</l>
+<l>read_image (Image, 'D:/Halcon/woodfloor/backCam/9points/cam_back_9_point_01.tif')</l>
+<l>get_image_size (Image, Width, Height)</l>
+<l>dev_open_window (0, 0, Width/2.5, Height/2.5, 'black', WindowHandle)</l>
+<l>dev_display (Image)</l>
+<l>create_drawing_object_rectangle2 (150, 150, 0, 100, 100, DrawID)</l>
+<l>set_drawing_object_params (DrawID, 'color', 'red')</l>
+<l>attach_drawing_object_to_window (WindowHandle, DrawID)</l>
+<l>attach_background_to_window (Image, WindowHandle)</l>
+<c></c>
+<l>* dev_set_draw ('margin')</l>
+<l>* get_drawing_object_iconic (Object, DrawID)</l>
+<l>set_window_param (WindowHandle, 'flush', 'false')</l>
+<l>Button := 0</l>
+<l>while (Button != 4)</l>
+<l>    try</l>
+<l>        my_draw_model (Image, TransContours, DrawID, ModelID)</l>
+<l>        display_results_COPY_1 (TransContours, WindowHandle)</l>
+<c>        * Check the mouse position and button</c>
+<l>        get_mposition (WindowHandle, Row, Column, Button)</l>
+<l>    catch (Exception)</l>
+<c>        * Keep waiting until mouse button is</c>
+<c>        * positioned in the window</c>
+<l>    endtry</l>
+<l>endwhile</l>
+<l>set_window_param (WindowHandle, 'flush', 'true')</l>
+<c></c>
+<c>* Detach the drawing objects</c>
+<l>dev_clear_window ()</l>
+<l>detach_drawing_object_from_window (WindowHandle, DrawID)</l>
+<l>detach_background_from_window (WindowHandle)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+<procedure name="perform_measurement">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<ic>
+<par name="DrawID" base_type="ctrl" dimension="0"/>
+<par name="Width" base_type="ctrl" dimension="0"/>
+<par name="Height" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="RowEdge" base_type="ctrl" dimension="0"/>
+<par name="ColumnEdge" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c>* Use the parameters of the drawing object to generate a</c>
+<c>* measure object</c>
+<l>get_drawing_object_params (DrawID, ['row','column','phi','length1','length2'], GenParamValue)</l>
+<l>gen_measure_rectangle2 (GenParamValue[0], GenParamValue[1], GenParamValue[2], GenParamValue[3], GenParamValue[4], Width, Height, 'nearest_neighbor', MeasureHandle)</l>
+<l>measure_pos (Image, MeasureHandle, 1, 30, 'all', 'all', RowEdge, ColumnEdge, Amplitude, Distance)</l>
+<l>return ()</l>
+</body>
+<docu id="perform_measurement">
+<parameters>
+<parameter id="ColumnEdge"/>
+<parameter id="DrawID"/>
+<parameter id="Height"/>
+<parameter id="Image"/>
+<parameter id="RowEdge"/>
+<parameter id="Width"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="display_results">
+<interface>
+<ic>
+<par name="RowEdge" base_type="ctrl" dimension="0"/>
+<par name="ColumnEdge" base_type="ctrl" dimension="0"/>
+<par name="WindowHandle" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<l>gen_cross_contour_xld (Cross, RowEdge, ColumnEdge, 15, 0.785398)</l>
+<l>dev_clear_window ()</l>
+<l>dev_display (Cross)</l>
+<l>flush_buffer (WindowHandle)</l>
+<l>return ()</l>
+</body>
+<docu id="display_results">
+<parameters>
+<parameter id="ColumnEdge"/>
+<parameter id="RowEdge"/>
+<parameter id="WindowHandle">
+<default_type>integer</default_type>
+<mixed_type>false</mixed_type>
+<sem_type>window</sem_type>
+<type_list>
+<item>integer</item>
+</type_list>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+<procedure name="image_processing">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="EdgeAmplitude" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="DrawID" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c>* Use the region of the iconic representation of the</c>
+<c>* drawing object for the edge detection</c>
+<l>get_drawing_object_iconic (Region, DrawID)</l>
+<l>reduce_domain (Image, Region, ImageReduced)</l>
+<l>sobel_amp (ImageReduced, EdgeAmplitude, 'sum_abs', 3)</l>
+<l>return ()</l>
+</body>
+<docu id="image_processing">
+<parameters>
+<parameter id="DrawID">
+<default_type>integer</default_type>
+<mixed_type>false</mixed_type>
+<sem_type>draw_object</sem_type>
+<type_list>
+<item>integer</item>
+</type_list>
+</parameter>
+<parameter id="EdgeAmplitude">
+<sem_type>image</sem_type>
+</parameter>
+<parameter id="Image">
+<sem_type>image</sem_type>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+<procedure name="display_results_COPY_1">
+<interface>
+<io>
+<par name="EdgeAmplitude" base_type="iconic" dimension="0"/>
+</io>
+<ic>
+<par name="WindowHandle" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c>* it is necessary to clear the graphic stack, so that previous</c>
+<c>* results do not show anymore</c>
+<l>dev_clear_window ()</l>
+<l>dev_display (EdgeAmplitude)</l>
+<l>flush_buffer (WindowHandle)</l>
+<l>return ()</l>
+</body>
+<docu id="display_results_COPY_1">
+<parameters>
+<parameter id="EdgeAmplitude">
+<sem_type>object</sem_type>
+</parameter>
+<parameter id="WindowHandle">
+<default_type>integer</default_type>
+<mixed_type>false</mixed_type>
+<sem_type>window</sem_type>
+<type_list>
+<item>integer</item>
+</type_list>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+<procedure name="my_draw_model">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="TransContours" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="DrawID" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="ModelID" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<l>get_drawing_object_params (DrawID, ['row','column','phi','length1','length2'], GenParamValue)</l>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,1,2]" as_ord="1">* </c>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,1,2]" as_ord="2">* Matching 01: Build the ROI from basic regions</c>
+<l>gen_rectangle2 (ModelRegion, GenParamValue[0], GenParamValue[1], GenParamValue[2], GenParamValue[3], GenParamValue[4])</l>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,1,3]" as_ord="1">* </c>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,1,3]" as_ord="2">* Matching 01: Reduce the model template</c>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,1,3]" as_ord="3">reduce_domain (Image, ModelRegion, TemplateImage)</l>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,1,4]" as_ord="1">* </c>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,1,4]" as_ord="2">* Matching 01: Create the shape model</c>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,1,4]" as_ord="3">create_shape_model (TemplateImage, 5, rad(0), rad(360), rad(0.1798), ['point_reduction_high','no_pregeneration'], 'use_polarity', [10,13,4], 3, ModelID)</l>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,2]" as_ord="1">* </c>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,2]" as_ord="2">* Matching 01: Get the model contour for transforming it later into the image</c>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,2]" as_ord="3">get_shape_model_contours (ModelContours, ModelID, 1)</l>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="1">* </c>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="2">* Matching 01: Get the reference position</c>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="3">area_center (ModelRegion, ModelRegionArea, RefRow, RefColumn)</l>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="4">vector_angle_to_rigid (0, 0, 0, RefRow, RefColumn, 0, HomMat2D)</l>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="5">affine_trans_contour_xld (ModelContours, TransContours, HomMat2D)</l>
+<c></c>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="6">* </c>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="7">* Matching 01: Display the model contours</c>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="8">dev_display (Image)</l>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="9">dev_set_color ('green')</l>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="10">dev_set_draw ('margin')</l>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="11">dev_display (ModelRegion)</l>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="12">dev_display (TransContours)</l>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="13">* stop ()</l>
+<l>return ()</l>
+</body>
+<docu id="my_draw_model">
+<parameters>
+<parameter id="DrawID"/>
+<parameter id="Image"/>
+<parameter id="ModelID"/>
+<parameter id="TransContours"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>
