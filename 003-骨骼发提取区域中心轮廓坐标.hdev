@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<l>dev_close_window ()</l>
+<l>read_image (Image, '123.bmp')</l>
+<l>get_image_size (Image, Width, Height)</l>
+<l>dev_open_window (0, 0, Width/3, Height/3, 'black', WindowHandle)</l>
+<l>dev_display (Image)</l>
+<l>threshold (Image, Region, 128, 255)</l>
+<l>skeleton (Region, Skeleton)</l>
+<l>connection (Skeleton, ConnectedRegions)</l>
+<l>* gen_contours_skeleton_xld (Skeleton, Contours, 1, 'filter')</l>
+<l>select_obj (ConnectedRegions, ObjectSelected, 2)</l>
+<l>get_region_contour (ObjectSelected, Rows, Columns)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
