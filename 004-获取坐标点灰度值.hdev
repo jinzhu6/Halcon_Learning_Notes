@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<l>dev_close_window ()</l>
+<l>read_image (Image, '1.jpg')</l>
+<l>get_grayval (Image, 100, 100, Grayval)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+<procedure name="perform_measurement">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<ic>
+<par name="DrawID" base_type="ctrl" dimension="0"/>
+<par name="Width" base_type="ctrl" dimension="0"/>
+<par name="Height" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="RowEdge" base_type="ctrl" dimension="0"/>
+<par name="ColumnEdge" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c>* Use the parameters of the drawing object to generate a</c>
+<c>* measure object</c>
+<l>get_drawing_object_params (DrawID, ['row','column','phi','length1','length2'], GenParamValue)</l>
+<l>gen_measure_rectangle2 (GenParamValue[0], GenParamValue[1], GenParamValue[2], GenParamValue[3], GenParamValue[4], Width, Height, 'nearest_neighbor', MeasureHandle)</l>
+<l>measure_pos (Image, MeasureHandle, 1, 30, 'all', 'all', RowEdge, ColumnEdge, Amplitude, Distance)</l>
+<l>return ()</l>
+</body>
+<docu id="perform_measurement">
+<parameters>
+<parameter id="ColumnEdge"/>
+<parameter id="DrawID"/>
+<parameter id="Height"/>
+<parameter id="Image"/>
+<parameter id="RowEdge"/>
+<parameter id="Width"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="display_results">
+<interface>
+<ic>
+<par name="RowEdge" base_type="ctrl" dimension="0"/>
+<par name="ColumnEdge" base_type="ctrl" dimension="0"/>
+<par name="WindowHandle" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<l>gen_cross_contour_xld (Cross, RowEdge, ColumnEdge, 15, 0.785398)</l>
+<l>dev_clear_window ()</l>
+<l>dev_display (Cross)</l>
+<l>flush_buffer (WindowHandle)</l>
+<l>return ()</l>
+</body>
+<docu id="display_results">
+<parameters>
+<parameter id="ColumnEdge"/>
+<parameter id="RowEdge"/>
+<parameter id="WindowHandle">
+<default_type>integer</default_type>
+<mixed_type>false</mixed_type>
+<sem_type>window</sem_type>
+<type_list>
+<item>integer</item>
+</type_list>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+<procedure name="image_processing">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="EdgeAmplitude" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="DrawID" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c>* Use the region of the iconic representation of the</c>
+<c>* drawing object for the edge detection</c>
+<l>get_drawing_object_iconic (Region, DrawID)</l>
+<l>reduce_domain (Image, Region, ImageReduced)</l>
+<l>sobel_amp (ImageReduced, EdgeAmplitude, 'sum_abs', 3)</l>
+<l>return ()</l>
+</body>
+<docu id="image_processing">
+<parameters>
+<parameter id="DrawID">
+<default_type>integer</default_type>
+<mixed_type>false</mixed_type>
+<sem_type>draw_object</sem_type>
+<type_list>
+<item>integer</item>
+</type_list>
+</parameter>
+<parameter id="EdgeAmplitude">
+<sem_type>image</sem_type>
+</parameter>
+<parameter id="Image">
+<sem_type>image</sem_type>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+<procedure name="display_results_COPY_1">
+<interface>
+<io>
+<par name="EdgeAmplitude" base_type="iconic" dimension="0"/>
+</io>
+<ic>
+<par name="WindowHandle" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c>* it is necessary to clear the graphic stack, so that previous</c>
+<c>* results do not show anymore</c>
+<l>dev_clear_window ()</l>
+<l>dev_display (EdgeAmplitude)</l>
+<l>flush_buffer (WindowHandle)</l>
+<l>return ()</l>
+</body>
+<docu id="display_results_COPY_1">
+<parameters>
+<parameter id="EdgeAmplitude">
+<sem_type>object</sem_type>
+</parameter>
+<parameter id="WindowHandle">
+<default_type>integer</default_type>
+<mixed_type>false</mixed_type>
+<sem_type>window</sem_type>
+<type_list>
+<item>integer</item>
+</type_list>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+<procedure name="my_draw_model">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<ic>
+<par name="DrawID" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="ModelID" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,1,2]" as_ord="1">* </c>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,1,2]" as_ord="2">* Matching 01: Build the ROI from basic regions</c>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,1,2]" as_ord="3">gen_rectangle2 (ModelRegion, 533.5, 666.484, rad(-92.2443), 244.187, 139.02)</l>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,1,3]" as_ord="1">* </c>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,1,3]" as_ord="2">* Matching 01: Reduce the model template</c>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,1,3]" as_ord="3">reduce_domain (Image, ModelRegion, TemplateImage)</l>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,1,4]" as_ord="1">* </c>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,1,4]" as_ord="2">* Matching 01: Create the shape model</c>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,1,4]" as_ord="3">create_shape_model (TemplateImage, 5, rad(0), rad(360), rad(0.5652), ['point_reduction_high','no_pregeneration'], 'use_polarity', [53,74,4], 3, ModelID)</l>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,2]" as_ord="1">* </c>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,2]" as_ord="2">* Matching 01: Get the model contour for transforming it later into the image</c>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,2]" as_ord="3">get_shape_model_contours (ModelContours, ModelID, 1)</l>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="1">* </c>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="2">* Matching 01: Get the reference position</c>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="3">area_center (ModelRegion, ModelRegionArea, RefRow, RefColumn)</l>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="4">vector_angle_to_rigid (0, 0, 0, RefRow, RefColumn, 0, HomMat2D)</l>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="5">affine_trans_contour_xld (ModelContours, TransContours, HomMat2D)</l>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="6">* </c>
+<c as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="7">* Matching 01: Display the model contours</c>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="8">dev_display (Image)</l>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="9">dev_set_color ('green')</l>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="10">dev_set_draw ('margin')</l>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="11">dev_display (ModelRegion)</l>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="12">dev_display (TransContours)</l>
+<l as_id="matching" as_name="Matching 01" as_grp="[1,5]" as_ord="13">stop ()</l>
+<l>return ()</l>
+</body>
+<docu id="my_draw_model">
+<parameters>
+<parameter id="DrawID"/>
+<parameter id="Image"/>
+<parameter id="ModelID"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="my_vector_to_hom">
+<interface>
+<ic>
+<par name="Px" base_type="ctrl" dimension="0"/>
+<par name="Py" base_type="ctrl" dimension="0"/>
+<par name="Qx" base_type="ctrl" dimension="0"/>
+<par name="Qy" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="HomMat2D_long" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c>* divide into 4 regions to calculate matrix seperately</c>
+<c></c>
+<c></c>
+<l>i1 := 0</l>
+<l>i2 := 1</l>
+<l>i3 := 4</l>
+<l>i4 := 5</l>
+<l>Px_region1 := [Px[i1], Px[i2], Px[i3], Px[i4]]</l>
+<l>Py_region1 := [Py[i1], Py[i2], Py[i3], Py[i4]]</l>
+<l>Qx_region1 := [Qx[i1], Qx[i2], Qx[i3], Qx[i4]]</l>
+<l>Qy_region1 := [Qy[i1], Qy[i2], Qy[i3], Qy[i4]]</l>
+<l>vector_to_hom_mat2d (Px_region1, Py_region1, Qx_region1, Qy_region1, HomMat2D_region1)</l>
+<c></c>
+<l>i1 := 1</l>
+<l>i2 := 2</l>
+<l>i3 := 3</l>
+<l>i4 := 4</l>
+<l>Px_region2 := [Px[i1], Px[i2], Px[i3], Px[i4]]</l>
+<l>Py_region2 := [Py[i1], Py[i2], Py[i3], Py[i4]]</l>
+<l>Qx_region2 := [Qx[i1], Qx[i2], Qx[i3], Qx[i4]]</l>
+<l>Qy_region2 := [Qy[i1], Qy[i2], Qy[i3], Qy[i4]]</l>
+<l>vector_to_hom_mat2d (Px_region2, Py_region2, Qx_region2, Qy_region2, HomMat2D_region2)</l>
+<c></c>
+<l>i1 := 4</l>
+<l>i2 := 5</l>
+<l>i3 := 6</l>
+<l>i4 := 7</l>
+<l>Px_region3 := [Px[i1], Px[i2], Px[i3], Px[i4]]</l>
+<l>Py_region3 := [Py[i1], Py[i2], Py[i3], Py[i4]]</l>
+<l>Qx_region3 := [Qx[i1], Qx[i2], Qx[i3], Qx[i4]]</l>
+<l>Qy_region3 := [Qy[i1], Qy[i2], Qy[i3], Qy[i4]]</l>
+<l>vector_to_hom_mat2d (Px_region3, Py_region3, Qx_region3, Qy_region3, HomMat2D_region3)</l>
+<c></c>
+<l>i1 := 3</l>
+<l>i2 := 4</l>
+<l>i3 := 7</l>
+<l>i4 := 8</l>
+<l>Px_region4 := [Px[i1], Px[i2], Px[i3], Px[i4]]</l>
+<l>Py_region4 := [Py[i1], Py[i2], Py[i3], Py[i4]]</l>
+<l>Qx_region4 := [Qx[i1], Qx[i2], Qx[i3], Qx[i4]]</l>
+<l>Qy_region4 := [Qy[i1], Qy[i2], Qy[i3], Qy[i4]]</l>
+<l>vector_to_hom_mat2d (Px_region4, Py_region4, Qx_region4, Qy_region4, HomMat2D_region4)</l>
+<c></c>
+<l>HomMat2D_long := [HomMat2D_region1, HomMat2D_region2, HomMat2D_region3, HomMat2D_region4]</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="my_vector_to_hom">
+<parameters>
+<parameter id="HomMat2D_long"/>
+<parameter id="Px"/>
+<parameter id="Py"/>
+<parameter id="Qx"/>
+<parameter id="Qy"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="my_disp_image">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+<par name="ModelContours" base_type="iconic" dimension="0"/>
+</io>
+<ic>
+<par name="Row" base_type="ctrl" dimension="0"/>
+<par name="Column" base_type="ctrl" dimension="0"/>
+<par name="Angle" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c>* display model contour on image</c>
+<l>dev_display (Image)</l>
+<l>hom_mat2d_identity (HomMat2D)</l>
+<l>hom_mat2d_rotate (HomMat2D, Angle, 0, 0, HomMat2D)</l>
+<l>hom_mat2d_translate (HomMat2D, Row, Column, HomMat2D)</l>
+<l>affine_trans_contour_xld (ModelContours, TransContours, HomMat2D)</l>
+<l>dev_set_color ('green')</l>
+<l>dev_display (TransContours)</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="my_disp_image">
+<parameters>
+<parameter id="Angle"/>
+<parameter id="Column"/>
+<parameter id="Image"/>
+<parameter id="ModelContours"/>
+<parameter id="Row"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="in_range_2d">
+<interface>
+<ic>
+<par name="P3" base_type="ctrl" dimension="0"/>
+<par name="P1" base_type="ctrl" dimension="0"/>
+<par name="P2" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="res" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c>* judge whether P3 is in the range of P1 and P2, if yes return 1, else return 0</c>
+<c>* point P3, range P1,P2</c>
+<l>in_range_1d (P3[0], P1[0], P2[0], res0)</l>
+<l>in_range_1d (P3[1], P1[1], P2[1], res1)</l>
+<l>if (res0==1 and res1==1)</l>
+<l>    res := 1</l>
+<l>else</l>
+<l>    res := 0</l>
+<l>endif</l>
+<l>return ()</l>
+</body>
+<docu id="in_range_2d">
+<parameters>
+<parameter id="P1"/>
+<parameter id="P2"/>
+<parameter id="P3"/>
+<parameter id="res"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="in_range_1d">
+<interface>
+<ic>
+<par name="x3" base_type="ctrl" dimension="0"/>
+<par name="x1" base_type="ctrl" dimension="0"/>
+<par name="x2" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="res" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c>* judge whether x3 is in the range of x1 and x2, if yes return 1, else return 0</c>
+<c></c>
+<c></c>
+<l>if (x1&lt;=x2)</l>
+<l>*     if (x1&lt;=x3 and x3&lt;=x2)</l>
+<l>    if (x3&lt;=x2)</l>
+<c>        * in the range to in the side</c>
+<l>        res := 1</l>
+<l>    else</l>
+<c>        * outside the range</c>
+<l>        res := 0</l>
+<l>    endif</l>
+<c>    * x2&lt;x1</c>
+<l>else</l>
+<l>*     if (x2&lt;=x3 and x3&lt;= x1)</l>
+<l>    if (x2&lt;=x3)</l>
+<c>        * in the range to in the side</c>
+<l>        res := 1</l>
+<l>    else</l>
+<c>        * outside the range</c>
+<l>        res := 0</l>
+<l>    endif</l>
+<l>endif</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="in_range_1d">
+<parameters>
+<parameter id="res"/>
+<parameter id="x1"/>
+<parameter id="x2"/>
+<parameter id="x3"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="my_affine_trans_point">
+<interface>
+<ic>
+<par name="Px_cal" base_type="ctrl" dimension="0"/>
+<par name="Py_cal" base_type="ctrl" dimension="0"/>
+<par name="HomMat2D_long" base_type="ctrl" dimension="0"/>
+<par name="Px" base_type="ctrl" dimension="0"/>
+<par name="Py" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="Qx" base_type="ctrl" dimension="0"/>
+<par name="Qy" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c></c>
+<c>* to do: now 1 point, future array, use loop</c>
+<l>HomMat2D_region1 := HomMat2D_long[0:5]</l>
+<l>HomMat2D_region2 := HomMat2D_long[6:11]</l>
+<l>HomMat2D_region3 := HomMat2D_long[12:17]</l>
+<l>HomMat2D_region4 := HomMat2D_long[18:23]</l>
+<c></c>
+<l>Qx := Px</l>
+<l>Qy := Py</l>
+<l>for i := 0 to |Qx|-1 by 1</l>
+<c></c>
+<l>    P3 := [Px[i], Py[i]]</l>
+<l>    P1 := [Px_cal[0],Py_cal[0]]</l>
+<l>    P2 := [Px_cal[4],Py_cal[4]]</l>
+<l>    in_range_2d (P3, P1, P2, res01)</l>
+<l>    P1 := [Px_cal[2],Py_cal[2]]</l>
+<l>    P2 := [Px_cal[4],Py_cal[4]]</l>
+<l>    in_range_2d (P3, P1, P2, res02)</l>
+<l>    P1 := [Px_cal[6],Py_cal[6]]</l>
+<l>    P2 := [Px_cal[4],Py_cal[4]]</l>
+<l>    in_range_2d (P3, P1, P2, res03)</l>
+<l>    P1 := [Px_cal[8],Py_cal[8]]</l>
+<l>    P2 := [Px_cal[4],Py_cal[4]]</l>
+<l>    in_range_2d (P3, P1, P2, res04)</l>
+<c></c>
+<l>    if (res01==1)</l>
+<l>        HomMat2D_use := HomMat2D_region1</l>
+<l>    elseif (res02==1)</l>
+<l>        HomMat2D_use := HomMat2D_region2</l>
+<l>    elseif (res03==1)</l>
+<l>        HomMat2D_use := HomMat2D_region3</l>
+<l>    else</l>
+<c>        * to do: better</c>
+<l>        HomMat2D_use := HomMat2D_region4</l>
+<l>    endif</l>
+<c></c>
+<l>    affine_trans_point_2d (HomMat2D_use, Px[i], Py[i], temp01, temp02)</l>
+<l>    Qx[i] := temp01</l>
+<l>    Qy[i] := temp02</l>
+<c></c>
+<l>endfor</l>
+<c></c>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="my_affine_trans_point">
+<parameters>
+<parameter id="HomMat2D_long"/>
+<parameter id="Px"/>
+<parameter id="Px_cal"/>
+<parameter id="Py"/>
+<parameter id="Py_cal"/>
+<parameter id="Qx"/>
+<parameter id="Qy"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="m_get_line">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<ic>
+<par name="line_roi" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="Line" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c>* ROI - [p1_row, p1_col, p2_row, p2_col]</c>
+<c>* Line - [p1_row, p1_col, p2_row, p2_col]</c>
+<c></c>
+<l>create_metrology_model (MetrologyHandle)</l>
+<c></c>
+<l>get_image_size (Image, Width, Height)</l>
+<c></c>
+<l>set_metrology_model_image_size (MetrologyHandle, Width, Height)</l>
+<c></c>
+<l>add_metrology_object_line_measure (MetrologyHandle, line_roi[0], line_roi[1], line_roi[2], line_roi[3], 5, 5, 1, 10, [], [], Index)</l>
+<l>* add_metrology_object_line_measure (MetrologyHandle, line_roi[0], line_roi[1], line_roi[2], line_roi[3], 20, 5, 1, 30, 'measure_transition', 'positive', Index)</l>
+<c></c>
+<l>apply_metrology_model (Image, MetrologyHandle)</l>
+<c></c>
+<l>get_metrology_object_result (MetrologyHandle, Index, 'all', 'result_type', 'all_param', Parameter)</l>
+<c></c>
+<l>get_metrology_object_result_contour (Contour1, MetrologyHandle, 0, 'all', 1.5)</l>
+<c></c>
+<l>get_metrology_object_measures (Contours2, MetrologyHandle, 'all', 'all', Row, Column)</l>
+<c></c>
+<l>Line := [Parameter[0], Parameter[1], Parameter[2], Parameter[3]]</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="m_get_line">
+<parameters>
+<parameter id="Image"/>
+<parameter id="Line"/>
+<parameter id="line_roi"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>
