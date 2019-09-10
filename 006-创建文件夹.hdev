@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c></c>
+<l>abspath := 'D:/Halcon/woodfloor-2019.8.30/'</l>
+<l>save_path:= abspath + 'runsave/'</l>
+<l>img_file_base:=''</l>
+<l>img_file_son:=''</l>
+<l>while(1)</l>
+<l>    get_system_time (MSecond, Second, Minute, Hour, Day, YDay, Month, Year)</l>
+<l>    img_file_base :=save_path+ Year$'02d'+Month$'02d'+Day$'02d'</l>
+<l>    img_file_son:= Hour$'02d'+Minute$'02d'+Second$'02d' +MSecond$'02d'</l>
+<l>    file_exists (img_file_base, FileExists)</l>
+<l>    if(FileExists)</l>
+<l>        make_dir (img_file_base+'/'+img_file_son)</l>
+<l>    else</l>
+<l>        make_dir (img_file_base)</l>
+<l>        make_dir (img_file_base+'/'+img_file_son)</l>
+<l>    endif</l>
+<c>   </c>
+<c>    </c>
+<c></c>
+<l>    stop()</l>
+<l>endwhile</l>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+<procedure name="my_test">
+<interface>
+<ic>
+<par name="row" base_type="ctrl" dimension="0"/>
+<par name="col" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="out" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<l>out[0]:=row</l>
+<l>out[1]:=col</l>
+<c></c>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="my_test">
+<parameters>
+<parameter id="col"/>
+<parameter id="out"/>
+<parameter id="row"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="my_time_str">
+<interface>
+<oc>
+<par name="time_str" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c>* get the system time and convert it to a string</c>
+<c></c>
+<l>get_system_time (MSecond, Second, Minute, Hour, Day, YDay, Month, Year)</l>
+<c></c>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="my_time_str">
+<parameters>
+<parameter id="time_str"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>
